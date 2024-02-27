@@ -160,3 +160,96 @@ The registers stores the address of the instruction that has to be executed next
 
 **When computing an address, two registers cannot be subtracted**
 **When computing an address, at most two registers can be used**
+
+
+# data structures
+
+## Structures
+
+### Declaration
+
+Declaration of a structure in assembly has the following rules:
+
+1. **struc *name***
+2. declare structure fields
+3. **endstruc**
+
+Each filed of the structure has the following rules:
+
+1. label (used to access member; represent the offset in the structure)
+2. type specifier
+3. number of elements
+
+When declaring structure members we will use pseudo instructions **res**(resb, resw, resd, etc). These are used because, unlike instructions with **d**(db, dw, dd, etc), they are used to reserve uninitialized memory (.bss section).
+
+Example of declaring a structure:
+```
+; member1 starting at offset 0 and size of 8 bytes (8 * 1 byte)
+; member2 starting at offset 8 and size of 16 bytes (8 * 2 bytes)
+; member3 starting at offset 24 and size of 16 bytes (4 * 4 bytes)
+; member4 starting at offset 40 and size of 2 bytes (2 * 1 byte)
+
+struc teststruct
+	member1:    resb 8
+	member2:    resw 8
+	member3:    resd 4
+	member4:    resb 2
+endstruc
+```
+
+### Initialization
+
+The initialization of a structure is performed in **.data** section using keywords **istruc** and **iend**. Note that for this step directives **d**(db, dw, dd, etc) are required so that memory to be allocatedand should match the data type in structure declaration.
+
+Example of initialize a structure:
+```
+var_struct:
+	istruc teststruct
+		at member1, db 1,2,3,4,5,6,7,8
+		at member2, dw 301,302,303,304,305,306,307,308
+		at member3, dd 100001,100002,100003,100004
+		at member4, db 1,2
+	iend
+```
+
+### Access
+
+Example of accessing structure members:
+```
+; update member1 of structure at index 2
+mov ebx, 1
+mov al, 12
+mov byte [var_struct + member1 + ebx * 1], al
+
+; update member2 of structure at index 5
+mov ebx, 4
+mov ax, 400
+mov word [var_struct + member2 + ebx * 2], ax
+
+; update member3 of structure at index 0
+mov ebx, 0
+mov eax, 200001
+mov word [var_struct + member3 + ebx * 4], eax
+```
+
+## Arrays
+
+### Declaration/Initialization
+
+In order to declare an array in assembly we have two options.
+
+1. Declare and initialize the array (**.data** section)
+
+*times instruction cause the instruction to be assembled multiple times*
+```
+; declare and initialize an array of 64 elements of byte size with default value of 100
+section .data
+	array	times 64 db 100
+```
+
+2. Declare an unitialized array (**.bss** section)
+```
+; declare an uninitialize an array of 64 byte
+section .bss
+	array	resb 64
+```
