@@ -117,6 +117,7 @@ The registers stores the address of the instruction that has to be executed next
 | -           | -               | -                                                                                      |
 | cmp         | dst, src        | Compare src and dst, by subtracting src from dst                                       |
 | test        | dst, src        | Compare src and dst, by performing bitwise AND (efficient in compare with 0)           |
+| loop        | *label*         | Used for loop, using ecx register; decrement ecx and check if != 0, jumping at *label* |
 | call        | *addr*          | Call function at a specific address                                                    |
 | jmp         | *addr*          | Unconditional jump to a specific address                                               |
 | je/jz       | *addr*          | **signed/unsigned** Equal or zero conditional jump to a specific address (ZF)          |
