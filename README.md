@@ -253,3 +253,35 @@ section .data
 section .bss
 	array	resb 64
 ```
+
+# stack
+
+**The default limit of the stack size on 64-bits architectures is 8MiB.**
+
+## Opeartions
+
+1. The stack can be manipulated using special instructions like **push** and **pop**
+
+```
+section .text
+	global main
+
+main:
+	mov eax, 10
+	push eax			; store content of eax on the stack
+	pop eax				; restore the content of eax register
+```
+2. The stack can be manipulated using the register that track the top of the stack, **esp**
+
+```
+section .text
+	global main
+
+main:
+	mov eax, 10
+	sub esp, 4			; reserve 4 bytes on the stack
+	mov [esp], eax
+	add esp, 4			; clear the 4 bytes reserved on the stack
+```
+
+**The reason for using *sub* instruction to reserve memory on the stack is that the stack grows to lower memory addresses.**
