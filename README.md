@@ -285,3 +285,143 @@ main:
 ```
 
 **The reason for using *sub* instruction to reserve memory on the stack is that the stack grows to lower memory addresses.**
+
+## Function calls
+
+### Passing the parameters
+
+When talking about a function call, there are two major types of passing the arguments:
+
+1. Using the registers
+
+This is a faster approach because the parameters can be easily accessed using the registers. However, the downside is that the number of registers is limited, and the number of parameters may exceed the number of available registers. Another downside is the fact that the function may alter the register values, so they must be preserved onto the stack."
+
+2. Using the stack
+
+This approach ensure support for as many parameter function require, however is slower than using registers because of the access to memory.
+
+
+### Call
+
+When performing a function call, the following steps are required:
+1. Store the arguments on the stack, in reverse order as the function prototype.
+2. Perform **call** instruction.
+3. Restore stack state at the end of the call.
+
+**Example:**
+For a C function with the following prototype:
+```
+int my_function(int param1, int param2, int param3)
+```
+
+The actual call will be the following:
+```
+mov eax, [param3]
+mov ebx, [param2]
+mov ecx, [param1]
+
+; push parameters onto stack in reverse order
+push eax
+push ebx
+push ecx
+
+; perform the call
+call my_function
+
+; restore the stack
+add esp, 12
+```
+
+The **call** instruction is equivalent with the following instructions
+```
+push eip
+jmp my_function
+```
+Saving the next instruction address (**eip**) is important for the *caller* to know where the execution must continue after the *my_function* ends the execution.
+
+**Preamble**
+
+Given that the function's execution persists within the same stack, it is crucial (though not obligatory) to establish a fresh context for its execution. This is achieved by preserving the old base pointer address (*ebp*) and relocating it to the current stack pointer address (*esp*).
+
+```
+push ebp
+mov ebp, esp
+```
+
+**Epilogue**
+
+Since the callee creates its own context for executing the function, it is his responsibility to restore the stack to its state before the call was made. This is accomplished using the **leave** instruction.  
+
+The end of function execution is carried out using the **ret** instruction, which restores execution by popping the *eip* register from the stack.
+
+### Example
+
+Consider a function in C with three arguments and two local variables of type *int*:
+```
+int my_function(int param1, int param2, int param3)
+{
+	int localx, localy;
+
+	...
+}
+```
+
+Caller:
+
+```
+;
+; Store parameters into registers
+;
+mov eax, param3
+mov ebx, param2
+mov ecx, param1
+
+;
+; Push parameters in reverse order to stack
+;
+push eax
+push ebx
+push ecx
+
+;
+; Call the function (note that this will save the eip to stack)
+;
+call my_function
+
+;
+; Cleanup the stack
+;
+add esp, 12
+```
+
+Callee:
+
+```
+;
+; Preamble
+;
+push ebp
+mov ebp, esp
+
+;
+; Function local variables
+;
+sub esp, 8
+
+;
+; Accessing the parameters
+;
+mov ecx, dword [ebp + 8]			; param1
+mov ebx, dword [ebp + 12]			; param2
+mov eax, dword [ebp + 16]			; param3
+
+;
+; Epilogue
+;
+leave
+
+ret
+```
+Stack:
+
+![Stack](https://github.com/LazarRazvan/Assembly/blob/main/stack.png)
