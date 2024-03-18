@@ -354,6 +354,15 @@ Since the callee creates its own context for executing the function, it is his r
 
 The end of function execution is carried out using the **ret** instruction, which restores execution by popping the *eip* register from the stack.
 
+**Return value**
+
+To return a value from a function registeres can be used:
+
+1. For 8 bits return values, **al** register is used.
+1. For 16 bits return values, **ax** register is used.
+1. For 32 bits return values, **eax** register is used.
+1. For 64 bits return values, **edx:eax** registers are used.
+
 ### Example
 
 Consider a function in C with three arguments and two local variables of type *int*:
